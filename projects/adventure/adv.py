@@ -2,6 +2,7 @@ from room import Room
 from player import Player
 from world import World
 from graph import Graph
+from util import Queue
 
 import random
 
@@ -34,6 +35,7 @@ def dft(room, visited, randomDir):
     # dft
     stack = []
     stack.append(player.currentRoom.id)
+    is_dead_end = False
 
     while len(stack) > 0:
         v = stack.pop()
@@ -53,6 +55,8 @@ def dft(room, visited, randomDir):
                     # logs the direction
                     visited[v][randomDir] = player.currentRoom.id
                     traversalPath.append(randomDir)
+                else:
+                    is_dead_end = True
 
                 if randomDir == 'n':
                     visited[v]['s'] = prev
@@ -66,6 +70,8 @@ def dft(room, visited, randomDir):
             for neighbor in room[v][1]:
                 next = room[v][1][neighbor]
                 stack.append(next)
+    print(is_dead_end)
+    # return is_dead_end
 
 
 def traverse_path(room):
@@ -101,47 +107,40 @@ def traverse_path(room):
     """
     loops
     """
-    while len(visited) != len(room):
 
-        dft(room, visited, randomDir)
+    # while len(visited) != len(room):
 
-        # bfs
-        queue = []
-        queue.append([player.currentRoom.id])
-        while len(queue) > 0:
-            path = queue.pop(0)
-            v = path[-1]
-            for direction in visited[v]:
-                if visited[v][direction] == '?':
-                    randomDir = direction
-                    traversalPath.append(path)
-                    return
-                else:
-                    prev = player.currentRoom.id
-                    player.travel(direction)
-                    print(player.currentRoom.id)
-            if v not in visited:
-                if v == '?':
-                    randomDir = direction
-                    traversalPath.append(path)
-                    return
-                    
+    # dft(room, visited, randomDir)
 
-            # prev = player.currentRoom.id
-            # # travels
-            # player.travel(direction)
+    # bfs
+    visited = set()
+    queue = Queue()
+    queue.enqueue([player.currentRoom.id])
+    while queue.size() > 0:
+        path = queue.dequeue()
+        v = path[-1]
+        if v not in visited:
+            visited.add(v)
 
-            # # logs the direction
-            # visited[v][randomDir] = player.currentRoom.id
-            # traversalPath.append(direction)
-
-                # print(direction)
-
-    print(visited)
-    print(traversalPath)
+            for exit in g[v]:
+                if g[v][exit] == '?':
+                    return path
+            for neighbor in room[v][1]:
+                new_path = [*path, neighbor]
+                queue.enqueue(new_path)
 
 
-traverse_path(roomGraph)
+g = {}
+
+while len(g) < len(roomGraph):
+    current = player.currentRoom.id
+    print(current)
+    if current not in g:
+        g[current] = current
+
+
+# traverse_path(roomGraph)
+# print(g)
 
 # TRAVERSAL TEST
 visited_rooms = set()
